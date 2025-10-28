@@ -6,6 +6,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 import connectDb from "./config/connectDb.js";
+import patientRouter from "./routes/patient.route.js";
 
 
 const app = express();
@@ -23,11 +24,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-app.get('/health', (req, res) => {
-  res.cookie('time', new Date().toISOString());
-  res.send('ok');
-});
+app.use("/api/user", patientRouter);
 
 app.listen(PORT, () => {
   connectDb()

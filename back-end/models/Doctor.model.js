@@ -23,29 +23,35 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
     },
+
     mobileNumber: {
       type: Number,
       required: true,
       unique: true,
     },
+
     password: {
       type: String,
       required: true,
     },
+
     role: {
       type: String,
       enum: ['Doctor'],
       default: 'Doctor',
     },
+
     profileImage: {
       type: String,
       required: true,
     },
+
     specialization: {
       type: String,
       enum: [
@@ -65,6 +71,7 @@ const doctorSchema = new mongoose.Schema(
         'General Surgery',
       ],
     },
+
     category: {
       type: String,
       enum: [
@@ -80,38 +87,49 @@ const doctorSchema = new mongoose.Schema(
       ],
       required: false,
     },
+
     qualification: {
       type: String,
       required: false,
     },
+
     experience: {
       type: Number,
     },
+
     about: {
       type: String,
     },
+
     fees: {
       type: Number,
     },
+
     hospitalInfo: {
       name: { type: String },
       address: { type: String },
       city: { type: String },
     },
+
     availabilityRange: availabilityRangeSchema,
+
     dailyTimeRange: dailyTimeRangeSchema,
+
     slotDurationMinutes: {
       type: Number,
       default: 30,
     },
+
     isVerified: {
       type: Boolean,
       default: false,
     },
+
+    isDelete: {
+      type: Boolean,
+      default: false
+    },
   },
-  {
-    timestamps: true,
-  }
-);
+  { timestamps: true, });
 
 export default mongoose.model('Doctor', doctorSchema);

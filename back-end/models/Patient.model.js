@@ -31,7 +31,7 @@ const patientSchema = new mongoose.Schema({
 
     profileImage: {
         type: String,
-        required: true,
+        // required: true,
     },
 
     dob: {
@@ -60,6 +60,11 @@ const patientSchema = new mongoose.Schema({
             'A1+', 'A1-', 'A2+', 'A2-', 'A1B+', 'A1B-', 'A2B+', 'A2B-',
             'Bombay', 'Rh-null',
         ],
+    },
+
+    isDelete:{
+        type:Boolean,
+        default:false
     },
 
     EmergencyContact: {
