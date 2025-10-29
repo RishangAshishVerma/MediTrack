@@ -62,7 +62,7 @@ const patientSchema = new mongoose.Schema({
         ],
     },
 
-    isDelete:{
+    isDeleted:{
         type:Boolean,
         default:false
     },
