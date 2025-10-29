@@ -25,7 +25,7 @@ const doctorSchema = new mongoose.Schema(
     },
 
     email: {
-      type: String,
+      type: String,       
       required: true,
       unique: true,
     },
@@ -49,7 +49,7 @@ const doctorSchema = new mongoose.Schema(
 
     profileImage: {
       type: String,
-      required: true,
+      // required: true,
     },
 
     specialization: {
@@ -132,4 +132,5 @@ const doctorSchema = new mongoose.Schema(
   },
   { timestamps: true, });
 
-export default mongoose.model('Doctor', doctorSchema);
+const Doctor = mongoose.model("Doctor", doctorSchema);
+export default Doctor;
