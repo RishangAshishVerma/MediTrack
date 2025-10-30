@@ -3,6 +3,7 @@ import Doctor from "../models/doctor.model.js";
 import genToken from "../utils/token.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import sendMail from "../utils/nodemailer.js";
+import VerificationRequest from "../models/verification.model.js";
 
 
 export const signUp = async (req, res) => {
@@ -70,7 +71,7 @@ export const signUp = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({
         success: true,
@@ -212,7 +213,7 @@ export const deleteAccount = async (req, res) => {
       await user.save();
     }
 
-  
+
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -245,6 +246,44 @@ export const deleteAccount = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An unexpected error occurred while deleting your account.",
+    });
+  }
+};
+
+
+export const requestVerification = async (req, res) => {
+  try {
+    const user = req.userId; 
+
+    const exitUser = await VerificationRequest.findOne({
+      requestedUser: user,
+      status: "pending",
+    });
+
+    if (exitUser) {
+      
+      return res.status(400).json({
+        success: false,
+        message: "You already have a pending verification request.",
+      });
+    }
+    
+    const newRequest = new VerificationRequest({ requestedUser: user });
+    
+    await newRequest.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Verification request submitted successfully.",
+      request: newRequest,
+    });
+
+  } catch (error) {
+    console.error(error); 
+  
+    return res.status(500).json({
+      success: false,
+      message: "Server error while submitting request.",
     });
   }
 };

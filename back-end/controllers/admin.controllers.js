@@ -3,6 +3,8 @@ import genToken from "../utils/token.js";
 import sendMail from "../utils/nodemailer.js";
 import bcrypt from "bcrypt";
 import uploadOnCloudinary from "../utils/cloudinary.js";
+import VerificationRequest from "../models/verification.model.js";
+import Doctor from "../models/doctor.model.js";
 
 export const AdminSignup = async (req, res) => {
     const { name, email, mobileNumber, password, dob, age, gender } = req.body;
@@ -170,62 +172,110 @@ export const AdminSignOut = async (req, res) => {
 };
 
 export const deleteAccount = async (req, res) => {
-  try {
-    const { userId } = req;
+    try {
+        const { userId } = req;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: No valid token found.",
-      });
-    }
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: No valid token found.",
+            });
+        }
 
-    const user = await Admin.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
-      });
-    }
+        const user = await Admin.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
 
-    if (!user.isDeleted) {
-      user.isDeleted = true;
-      await user.save();
-    }
+        if (!user.isDeleted) {
+            user.isDeleted = true;
+            await user.save();
+        }
 
-  
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    });
 
-    (async () => {
-      try {
-        await sendMail(
-          user.email,
-          "Your MediTrack Account Has Been Deleted",
-          "Your MediTrack account has been successfully deleted.",
-          `<div style="font-family: Arial, sans-serif; color: #333;">
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "none",
+        });
+
+        (async () => {
+            try {
+                await sendMail(
+                    user.email,
+                    "Your MediTrack Account Has Been Deleted",
+                    "Your MediTrack account has been successfully deleted.",
+                    `<div style="font-family: Arial, sans-serif; color: #333;">
             <h2 style="color:#dc3545;">MediTrack Account Deleted ❌</h2>
             <p>Hi ${user.name},</p>
             <p>Your account has been permanently deleted. You can always sign up again if you wish.</p>
           </div>`
-        );
-      } catch (err) {
-        console.error("Failed to send account deletion email:", err.message);
-      }
-    })();
+                );
+            } catch (err) {
+                console.error("Failed to send account deletion email:", err.message);
+            }
+        })();
+
+        return res.status(200).json({
+            success: true,
+            message: "Your account has been deleted successfully.",
+        });
+    } catch (error) {
+        console.error("Error while deleting account:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An unexpected error occurred while deleting your account.",
+        });
+    }
+};
+
+export const updateVerificationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { Status } = req.body;
+    const adminId = req.userId;
+
+    const request = await VerificationRequest.findById(id);
+    if (!request) {
+      return res.status(404).json({ success: false, message: "Request not found" });
+    }
+
+    if (request.status === "accepted" || request.status === "rejected") {
+      return res.status(400).json({ success: false, message: "Request already processed." });
+    }
+
+    if (Status !== "accepted" && Status !== "rejected") {
+      return res.status(400).json({ success: false, message: "Invalid status value." });
+    }
+
+    request.status = Status;
+    request.admin = adminId;
+    await request.save();
+
+    if (Status === "accepted") {
+      await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: true });
+    } else {
+      await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: false });
+    }
+
+    const updatedRequest = await VerificationRequest.findById(id)
+      .populate("requestedUser", "name email")
+      .populate("admin", "name");
 
     return res.status(200).json({
       success: true,
-      message: "Your account has been deleted successfully.",
+      message: `Request ${Status}`,
+      request: updatedRequest
     });
+
   } catch (error) {
-    console.error("Error while deleting account:", error);
+    console.error("Verification update error:", error);
     return res.status(500).json({
       success: false,
-      message: "An unexpected error occurred while deleting your account.",
+      message: "Server error",
     });
   }
 };
