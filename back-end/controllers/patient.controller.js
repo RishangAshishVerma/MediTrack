@@ -98,7 +98,6 @@ export const signUp = async (req, res) => {
     }
 };
 
-
 export const signIn = async (req, res) => {
     try {
         const { email, password } = req.body
@@ -120,7 +119,7 @@ export const signIn = async (req, res) => {
         }
 
 
-        if (existingPatient?.isDelete) {
+        if (existingPatient?.isDeleted) {
             return res.status(409).json({
                 success: false,
                 message: "User is already deleted. Please contact support for assistance.",
@@ -183,8 +182,6 @@ export const signOut = async (req, res) => {
     }
 };
 
-
-
 export const deleteAccount = async (req, res) => {
   try {
     const { userId } = req;
@@ -210,14 +207,12 @@ export const deleteAccount = async (req, res) => {
       await user.save();
     }
 
-    // Clear authentication cookie
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
     });
 
-    // Send account deletion email asynchronously (non-blocking)
     (async () => {
       try {
         await sendMail(

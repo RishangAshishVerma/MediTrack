@@ -1,23 +1,30 @@
 import jwt from "jsonwebtoken";
 
-const isAuth = async (req, res, next) => {
+const isAuth = (req, res, next) => {
   try {
-    const { token } = req.cookies;
 
-    if (!token) {
-      return res.status(401).json({ message: "User does not have a token." });
+    const token =
+      req.cookies?.token ||
+      req.headers.authorization?.split(" ")[1];
+
+    console.log("🔑 Token received:", token);
+
+    if (!token || typeof token !== "string") {
+      return res.status(401).json({
+        message: "User does not have a valid token.",
+      });
     }
 
-    const verifyToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!verifyToken) {
-      return res.status(403).json({ message: "User does not have a valid token." });
-    }
+    req.userId = decoded.userId;
 
-    req.userId = verifyToken.userId;
     next();
   } catch (error) {
-    return res.status(500).json({ message: `isAuth error: ${error.message}` });
+    console.error("❌ isAuth error:", error.message);
+    return res.status(401).json({
+      message: "User does not have a valid token.",
+    });
   }
 };
 

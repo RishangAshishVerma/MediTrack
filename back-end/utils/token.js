@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const genToken = async (userId) => {
+const genToken = (userId) => {
     try {
         const token = jwt.sign(
             { userId },
@@ -10,8 +10,8 @@ const genToken = async (userId) => {
         return token;
     } catch (error) {
         console.error("Error generating token:", error);
-        return res.Status(200).json({ Message: "error whilr generating the token " })
+       
     }
 };
 
-export default genToken
+export default genToken;
