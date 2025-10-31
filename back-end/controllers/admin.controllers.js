@@ -232,6 +232,10 @@ export const deleteAccount = async (req, res) => {
     }
 };
 
+export const getAllAdmin = async (req,res) =>{
+    
+}
+
 export const updateVerificationStatus = async (req, res) => {
   try {
     const { id } = req.params;

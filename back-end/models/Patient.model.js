@@ -31,7 +31,7 @@ const patientSchema = new mongoose.Schema({
 
     profileImage: {
         type: String,
-        // required: true,
+        required: true,
     },
 
     dob: {

@@ -250,26 +250,48 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
-
 export const requestVerification = async (req, res) => {
   try {
-    const user = req.userId; 
+    const user = req.userId;
 
-    const exitUser = await VerificationRequest.findOne({
+    const existingRequest = await VerificationRequest.findOne({
       requestedUser: user,
       status: "pending",
     });
 
-    if (exitUser) {
-      
+    if (existingRequest) {
       return res.status(400).json({
         success: false,
         message: "You already have a pending verification request.",
       });
     }
-    
-    const newRequest = new VerificationRequest({ requestedUser: user });
-    
+
+    const documents = {};
+    const fileKeys = [
+      "aadhaarCard",
+      "passport",
+      "drivingLicence",
+      "PANCard",
+      "degreeCertificate",
+      "schoolLevelCertificates",
+    ];
+
+    if (req.files) {
+      const uploadPromises = fileKeys.map(async (key) => {
+        if (req.files[key]) {
+          const upload = await uploadOnCloudinary(req.files[key][0].path);
+          if (upload) documents[key] = upload;
+        }
+      });
+
+      await Promise.all(uploadPromises);
+    }
+
+    const newRequest = new VerificationRequest({
+      requestedUser: user,
+      ...documents,
+    });
+
     await newRequest.save();
 
     return res.status(201).json({
@@ -279,8 +301,7 @@ export const requestVerification = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error); 
-  
+    console.error("Error in requestVerification:", error);
     return res.status(500).json({
       success: false,
       message: "Server error while submitting request.",

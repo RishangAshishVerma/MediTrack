@@ -11,6 +11,14 @@ doctorRouter.post("/signup", upload.single('profileImage'), signUp)
 doctorRouter.post("/signin", signIn)
 doctorRouter.post("/signout", signOut)
 doctorRouter.delete("/deleteaccount", isAuth, deleteAccount)
-doctorRouter.post("/verification-request", isAuth, requestVerification)
+
+doctorRouter.post("/verification-request", isAuth, upload.fields([
+    { name: "aadhaarCard", maxCount: 1 },
+    { name: "passport", maxCount: 1 },
+    { name: "drivingLicence", maxCount: 1 },
+    { name: "PANCard", maxCount: 1 },
+    { name: "degreeCertificate", maxCount: 1 },
+    { name: "schoolLevelCertificates", maxCount: 1 },
+]) ,requestVerification)
 
 export default doctorRouter

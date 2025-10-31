@@ -6,17 +6,42 @@ const verificationSchema = new mongoose.Schema({
     ref: "Doctor",
     required: true
   },
+
   status: {
     type: String,
     enum: ['accepted', 'pending', 'rejected'],
     default: 'pending'
   },
+
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin"
-  }
+  },
+
+  // Single document URLs
+  aadhaarCard: {
+    type: String,
+  },
+  passport: {
+    type: String,
+  },
+  drivingLicence: {
+    type: String,
+  },
+  PANCard: {
+    type: String,
+  },
+  degreeCertificate: {
+    type: String,
+  },
+
+  
+  schoolLevelCertificates: {
+    type: String,
+  },
+
 }, { timestamps: true });
 
- const VerificationRequest = mongoose.model("VerificationRequest", verificationSchema);
+const VerificationRequest = mongoose.model("VerificationRequest", verificationSchema);
 
- export default VerificationRequest
+export default VerificationRequest;
