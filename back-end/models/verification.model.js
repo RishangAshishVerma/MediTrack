@@ -18,24 +18,26 @@ const verificationSchema = new mongoose.Schema({
     ref: "Admin"
   },
 
-  // Single document URLs
   aadhaarCard: {
     type: String,
   },
+  
   passport: {
     type: String,
   },
+
   drivingLicence: {
     type: String,
   },
+
   PANCard: {
     type: String,
   },
+
   degreeCertificate: {
     type: String,
   },
 
-  
   schoolLevelCertificates: {
     type: String,
   },

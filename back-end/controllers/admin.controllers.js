@@ -232,54 +232,78 @@ export const deleteAccount = async (req, res) => {
     }
 };
 
-export const getAllAdmin = async (req,res) =>{
-    
-}
+// export const getRandomAdminindex = async (req, res) => {
+//     try {
+
+//         const adminIds = await Admin.find({}, "_id");
+
+//         const randomIndex = Math.floor(Math.random() * adminIds.length);
+
+//         const randomAdminId = adminIds[randomIndex]
+
+//         return res.status(200).json(randomAdminId)
+
+//     } catch (error) {
+
+//         console.error("Error fetching admins:", error);
+//         return res.status(500).json({ message: "Error fetching admins" });
+//     }
+// };
 
 export const updateVerificationStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { Status } = req.body;
-    const adminId = req.userId;
+    try {
+        const { id } = req.params;
+        const { Status } = req.body;
+        const adminId = req.userId;
 
-    const request = await VerificationRequest.findById(id);
-    if (!request) {
-      return res.status(404).json({ success: false, message: "Request not found" });
+        const request = await VerificationRequest.findById(id);
+        if (!request) {
+            return res.status(404).json({ success: false, message: "Request not found" });
+        }
+console.log("request.admin:", request.admin);
+console.log("adminId:", adminId);
+console.log("Types:", typeof request.admin, typeof adminId);
+
+        if (request.admin.toString() !== adminId.toString()) {
+            return res.status(400).json({
+                success: false,
+                message: "You are not allowed to access this request"
+            });
+        }
+
+        if (request.status === "accepted" || request.status === "rejected") {
+            return res.status(400).json({ success: false, message: "Request already processed." });
+        }
+
+        if (Status !== "accepted" && Status !== "rejected") {
+            return res.status(400).json({ success: false, message: "Invalid status value." });
+        }
+
+        request.status = Status;
+        request.admin = adminId;
+        await request.save();
+
+        if (Status === "accepted") {
+            await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: true });
+        } else {
+            await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: false });
+        }
+
+        const updatedRequest = await VerificationRequest.findById(id)
+            .populate("requestedUser", "name email")
+            .populate("admin", "name");
+
+        return res.status(200).json({
+            success: true,
+            message: `Request ${Status}`,
+            request: updatedRequest
+        });
+
+    } catch (error) {
+        console.error("Verification update error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
     }
-
-    if (request.status === "accepted" || request.status === "rejected") {
-      return res.status(400).json({ success: false, message: "Request already processed." });
-    }
-
-    if (Status !== "accepted" && Status !== "rejected") {
-      return res.status(400).json({ success: false, message: "Invalid status value." });
-    }
-
-    request.status = Status;
-    request.admin = adminId;
-    await request.save();
-
-    if (Status === "accepted") {
-      await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: true });
-    } else {
-      await Doctor.findByIdAndUpdate(request.requestedUser, { isVerified: false });
-    }
-
-    const updatedRequest = await VerificationRequest.findById(id)
-      .populate("requestedUser", "name email")
-      .populate("admin", "name");
-
-    return res.status(200).json({
-      success: true,
-      message: `Request ${Status}`,
-      request: updatedRequest
-    });
-
-  } catch (error) {
-    console.error("Verification update error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
 };

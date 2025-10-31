@@ -4,6 +4,7 @@ import genToken from "../utils/token.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import sendMail from "../utils/nodemailer.js";
 import VerificationRequest from "../models/verification.model.js";
+import Admin from "../models/admin.model.js";
 
 
 export const signUp = async (req, res) => {
@@ -266,6 +267,16 @@ export const requestVerification = async (req, res) => {
       });
     }
 
+    const adminIds = await Admin.find({}, "_id");
+    if (!adminIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No admins available to assign.",
+      });
+    }
+    const randomIndex = Math.floor(Math.random() * adminIds.length);
+    const randomAdminId = adminIds[randomIndex]._id;
+
     const documents = {};
     const fileKeys = [
       "aadhaarCard",
@@ -287,8 +298,10 @@ export const requestVerification = async (req, res) => {
       await Promise.all(uploadPromises);
     }
 
+
     const newRequest = new VerificationRequest({
       requestedUser: user,
+      admin: randomAdminId,
       ...documents,
     });
 
@@ -297,6 +310,7 @@ export const requestVerification = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Verification request submitted successfully.",
+      assignedAdmin: randomAdminId,
       request: newRequest,
     });
 
