@@ -8,14 +8,15 @@ const dailyTimeRangeSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const availabilityRangeSchema = new mongoose.Schema(
-  {
-    startDate: { type: String },
-    endDate: { type: String },
-    excludedWeekdays: { type: [Number], default: [] },
-  },
-  { _id: false }
-);
+
+// const availabilityRangeSchema = new mongoose.Schema(
+//   {
+//     startDate: { type: String },
+//     endDate: { type: String },
+//     excludedWeekdays: { type: [Number], default: [] },
+//   },
+//   { _id: false }
+// );
 
 const doctorSchema = new mongoose.Schema(
   {
@@ -111,7 +112,7 @@ const doctorSchema = new mongoose.Schema(
       city: { type: String },
     },
 
-    availabilityRange: availabilityRangeSchema,
+    // availabilityRange: availabilityRangeSchema,
 
     dailyTimeRange: dailyTimeRangeSchema,
 

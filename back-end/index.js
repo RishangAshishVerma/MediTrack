@@ -10,6 +10,7 @@ import patientRouter from "./routes/patient.route.js";
 import cookieParser from "cookie-parser";
 import doctorRouter from "./routes/doctor.routes.js";
 import adminRouter from "./routes/admin.routes.js";
+import appointmentRouter from "./routes/appointment.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/user", patientRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/appointmennt", appointmentRouter)
 
 app.listen(PORT, () => {
   connectDb()

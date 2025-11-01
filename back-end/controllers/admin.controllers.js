@@ -260,9 +260,7 @@ export const updateVerificationStatus = async (req, res) => {
         if (!request) {
             return res.status(404).json({ success: false, message: "Request not found" });
         }
-console.log("request.admin:", request.admin);
-console.log("adminId:", adminId);
-console.log("Types:", typeof request.admin, typeof adminId);
+
 
         if (request.admin.toString() !== adminId.toString()) {
             return res.status(400).json({
