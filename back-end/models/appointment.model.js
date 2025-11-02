@@ -8,7 +8,7 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    doctor: { 
+    doctor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Doctor",
       required: true,
@@ -49,6 +49,12 @@ const appointmentSchema = new mongoose.Schema(
     cancel: {
       type: Boolean,
       default: "false",
+    },
+
+    cancelReason: {
+      type: String,
+      required: true,
+      default: " "
     },
 
     meetingLink: {

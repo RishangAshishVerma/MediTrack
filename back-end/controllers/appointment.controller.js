@@ -18,12 +18,13 @@ export const bookAppointment = async (req, res) => {
             return res.status(404).json({ success: false, message: "Doctor not found" });
         }
 
-        if (!startTime || !endTime  || !problem) {
+        if (!startTime || !endTime || !problem) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing.",
             });
         }
+
 
         const diffInMs = new Date(endTime) - new Date(startTime);
         const diffInMinutes = diffInMs / (1000 * 60);
@@ -34,7 +35,22 @@ export const bookAppointment = async (req, res) => {
                 message: `The difference between start and end time cannot be more than ${doctorfind.slotDurationMinutes} minutes.`,
             });
         }
+        const existingAppointment = await Appointment.findOne({
+            doctor: doctorid,
+            $or: [
+                {
+                    startTime: { $lt: endTime },
+                    endTime: { $gt: startTime }
+                }
+            ]
+        });
 
+        if (existingAppointment) {
+            return res.status(400).json({
+                success: false,
+                message: "This time slot is already booked for the doctor.",
+            });
+        }
         const booking = await Appointment.create({
             startTime,
             endTime,
@@ -49,11 +65,78 @@ export const bookAppointment = async (req, res) => {
             data: booking,
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error booking appointment:", error);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
-            error: error.message,
+        });
+    }
+};
+
+
+export const cancelAppointment = async (req, res) => {
+    try {
+        const bookingId = req.params.id;       
+        const userId = req.userId;             
+        const { cancelReason } = req.body;
+
+       
+        if (!cancelReason) {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason is required.",
+            });
+        }
+
+       
+        const appointment = await Appointment.findById(bookingId);
+
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: "Appointment not found.",
+            });
+        }
+
+       
+        if (appointment.patient.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only cancel your own appointments.",
+            });
+        }
+
+    
+        const now = new Date();
+        const startTime = new Date(appointment.startTime);
+        const diffInMs = startTime - now;
+        const diffInHours = diffInMs / (1000 * 60 * 60);
+
+        if (diffInHours < 4) {
+            return res.status(400).json({
+                success: false,
+                message: "You can only cancel appointments at least 4 hours before the start time.",
+            });
+        }
+
+    
+        appointment.cancel = true;
+        appointment.cancelReason = cancelReason;
+        appointment.canceledAt = new Date();
+
+        await appointment.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Appointment canceled successfully.",
+            data: appointment,
+        });
+
+    } catch (error) {
+        console.error("Error canceling appointment:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
         });
     }
 };
