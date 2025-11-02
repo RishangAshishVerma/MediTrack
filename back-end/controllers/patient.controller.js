@@ -52,7 +52,7 @@ export const signUp = async (req, res) => {
             PatientMedicalHistory,
         });
 
-        const token = await genToken(patient._id);
+        const token = await genToken(patient._id,patient.role);
 
 
         res.status(201).cookie("token", token, {
@@ -135,7 +135,7 @@ export const signIn = async (req, res) => {
             });
         }
 
-        const token = await genToken(existingPatient._id);
+        const token = await genToken(existingPatient._id,existingPatient.role);
 
 
         res.cookie("token", token, {

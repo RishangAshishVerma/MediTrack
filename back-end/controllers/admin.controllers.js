@@ -46,7 +46,7 @@ export const AdminSignup = async (req, res) => {
             profileImage: " ",
         });
 
-        const token = await genToken(admin._id);
+        const token = await genToken(admin._id, admin.role);
 
         res
             .status(201)
@@ -126,7 +126,7 @@ export const AdminSignIn = async (req, res) => {
             });
         }
 
-        let token = genToken(existingAdmin._id)
+        let token = genToken(existingAdmin._id, existingAdmin.role)
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -254,20 +254,20 @@ export const updateVerificationStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { Status } = req.body;
-        const adminId = req.userId;
+        const adminId = req.user.id;
 
         const request = await VerificationRequest.findById(id);
         if (!request) {
             return res.status(404).json({ success: false, message: "Request not found" });
         }
 
-
-        if (request.admin.toString() !== adminId.toString()) {
+        if (!request.admin || request.admin.toString() !== adminId?.toString()) {
             return res.status(400).json({
                 success: false,
-                message: "You are not allowed to access this request"
+                message: "You are not allowed to access this request",
             });
         }
+
 
         if (request.status === "accepted" || request.status === "rejected") {
             return res.status(400).json({ success: false, message: "Request already processed." });

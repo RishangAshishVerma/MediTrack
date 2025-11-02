@@ -12,7 +12,7 @@ export const signUp = async (req, res) => {
     const {
       name, email, mobileNumber, password, profileImage,
       specialization, category, qualification, experience, about, fees,
-      hospitalInfo, availabilityRange, dailyTimeRange, slotDurationMinutes, } = req.body;
+      hospitalInfo, availabilityRange, dailyTimeRange, slotDurationMinutes, role } = req.body;
 
 
     if (!name || !email || !mobileNumber || !password) {
@@ -60,10 +60,11 @@ export const signUp = async (req, res) => {
       availabilityRange,
       dailyTimeRange,
       slotDurationMinutes,
+      role:Doctor,
     });
 
 
-    let token = genToken(newDoctor._id);
+    let token = genToken(newDoctor._id,newDoctor.role);
 
 
     res
@@ -145,7 +146,7 @@ export const signIn = async (req, res) => {
       });
     }
 
-    let token = genToken(existingDoctor._id)
+    let token = genToken(existingDoctor._id,existingDoctor.role)
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -253,7 +254,7 @@ export const deleteAccount = async (req, res) => {
 
 export const requestVerification = async (req, res) => {
   try {
-    const user = req.userId;
+   const user = req.user.id;
 
     const existingRequest = await VerificationRequest.findOne({
       requestedUser: user,

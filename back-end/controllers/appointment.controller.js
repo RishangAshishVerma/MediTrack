@@ -3,7 +3,7 @@ import Doctor from "../models/doctor.model.js"
 
 export const bookAppointment = async (req, res) => {
     try {
-        const user = req.userId;
+        const user = req.user.id;
         const doctorid = req.params.id;
 
         const doctorfind = await Doctor.findById(doctorid);
@@ -76,11 +76,11 @@ export const bookAppointment = async (req, res) => {
 
 export const cancelAppointment = async (req, res) => {
     try {
-        const bookingId = req.params.id;       
-        const userId = req.userId;             
+        const bookingId = req.params.id;
+        const userId =  req.user.id;
         const { cancelReason } = req.body;
 
-       
+
         if (!cancelReason) {
             return res.status(400).json({
                 success: false,
@@ -88,7 +88,7 @@ export const cancelAppointment = async (req, res) => {
             });
         }
 
-       
+
         const appointment = await Appointment.findById(bookingId);
 
         if (!appointment) {
@@ -98,7 +98,7 @@ export const cancelAppointment = async (req, res) => {
             });
         }
 
-       
+
         if (appointment.patient.toString() !== userId.toString()) {
             return res.status(403).json({
                 success: false,
@@ -106,7 +106,7 @@ export const cancelAppointment = async (req, res) => {
             });
         }
 
-    
+
         const now = new Date();
         const startTime = new Date(appointment.startTime);
         const diffInMs = startTime - now;
@@ -119,7 +119,7 @@ export const cancelAppointment = async (req, res) => {
             });
         }
 
-    
+
         appointment.cancel = true;
         appointment.cancelReason = cancelReason;
         appointment.canceledAt = new Date();
@@ -140,3 +140,4 @@ export const cancelAppointment = async (req, res) => {
         });
     }
 };
+
