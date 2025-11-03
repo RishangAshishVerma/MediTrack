@@ -53,6 +53,7 @@ export const startCall = async (req, res) => {
 
         appointment.meetingLink = meetingLink;
         await appointment.save();
+
         // --- Patient Email ---
         const patientSubject = "Your MediTrack Video Appointment is Ready";
         const patientHTML = `
@@ -147,6 +148,7 @@ export const endCall = async (req, res) => {
       message: "Call ended and appointment marked as completed",
       data: { appointmentId: appointment._id, status: appointment.status },
     });
+    
   } catch (error) {
     console.error("Error ending call:", error);
     res.status(500).json({

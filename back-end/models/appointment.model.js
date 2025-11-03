@@ -41,6 +41,11 @@ const appointmentSchema = new mongoose.Schema(
       default: "unpaid",
     },
 
+    paymentIntentId: {
+      type: String,
+      default: "",
+    },
+
     reminderSent: {
       type: Boolean,
       default: false,
