@@ -60,11 +60,11 @@ export const signUp = async (req, res) => {
       availabilityRange,
       dailyTimeRange,
       slotDurationMinutes,
-      role:Doctor,
+      role: Doctor,
     });
 
 
-    let token = genToken(newDoctor._id,newDoctor.role);
+    let token = genToken(newDoctor._id, newDoctor.role);
 
 
     res
@@ -127,7 +127,7 @@ export const signIn = async (req, res) => {
         message: "Required fields are missing.",
       });
     }
-    const existingDoctor = await Doctor.findOne({ email });
+    const existingDoctor = await Doctor.findOne({ email }).select("-password");;
 
     if (existingDoctor?.isDelete) {
       return res.status(409).json({
@@ -146,7 +146,7 @@ export const signIn = async (req, res) => {
       });
     }
 
-    let token = genToken(existingDoctor._id,existingDoctor.role)
+    let token = genToken(existingDoctor._id, existingDoctor.role)
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -202,7 +202,7 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
-    const user = await Doctor.findById(userId);
+    const user = await Doctor.findById(userId).select("-password");;
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -254,7 +254,7 @@ export const deleteAccount = async (req, res) => {
 
 export const requestVerification = async (req, res) => {
   try {
-   const user = req.user.id;
+    const user = req.user.id;
 
     const existingRequest = await VerificationRequest.findOne({
       requestedUser: user,
@@ -323,3 +323,31 @@ export const requestVerification = async (req, res) => {
     });
   }
 };
+
+export const search = async (req, res) => {
+  try {
+    const { name, specialization } = req.query;
+
+    const filter = {};
+    if (name || specialization) {
+      filter.$text = {
+        $search: `${name || ""} ${specialization || ""}`.trim(),
+      };
+    }
+
+    filter.isDelete = false;
+
+    const doctors = await Doctor.find(filter).select("-password");
+
+    res.status(200).json({
+      success: true,
+      count: doctors.length,
+      data: doctors,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}

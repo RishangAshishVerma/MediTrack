@@ -6,8 +6,6 @@ const isAuth = (req, res, next) => {
       req.cookies?.token ||
       req.headers.authorization?.split(" ")[1];
 
-    console.log("🔑 Token received:", token);
-
     if (!token || typeof token !== "string") {
       return res.status(401).json({
         message: "User does not have a valid token.",

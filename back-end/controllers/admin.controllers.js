@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import VerificationRequest from "../models/verification.model.js";
 import Doctor from "../models/doctor.model.js";
-
+import Patient from "../models/Patient.model.js"
 export const AdminSignup = async (req, res) => {
     const { name, email, mobileNumber, password, dob, age, gender } = req.body;
 
@@ -305,3 +305,59 @@ export const updateVerificationStatus = async (req, res) => {
         });
     }
 };
+
+export const getPatient = async (req, res) => {
+    try {
+
+        const { email } = req.body
+        const existingPatient = await Patient.findOne({ email })
+
+        if (!existingPatient) {
+            return res.status(404).json({
+                success: false,
+                message: "Patient not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            existingPatient
+        })
+
+    } catch (error) {
+        console.log(`error while getting Patient data ${error}`);
+
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+export const getDoctor = async (req, res) => {
+    try {
+
+        const { email } = req.body
+        const existingDoctor = await Doctor.findOne({ email })
+
+        if (!existingDoctor) {
+            return res.status(404).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            existingDoctor
+        })
+
+    } catch (error) {
+        console.log(`error while getting Doctor data${error}`);
+
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}

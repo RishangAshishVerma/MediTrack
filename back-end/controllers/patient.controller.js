@@ -109,7 +109,7 @@ export const signIn = async (req, res) => {
             });
         }
 
-        const existingPatient = await Patient.findOne({ email });
+        const existingPatient = await Patient.findOne({ email }).select("-password");;
 
         if (!existingPatient) {
             return res.status(400).json({
@@ -193,7 +193,7 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
-    const user = await Patient.findById(userId);
+    const user = await Patient.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,

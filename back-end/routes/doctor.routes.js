@@ -22,4 +22,7 @@ doctorRouter.post("/verification-request", isAuth, authorizeRole("Doctor") , upl
     { name: "schoolLevelCertificates", maxCount: 1 },
 ]) ,requestVerification)
 
+
+
+
 export default doctorRouter
